@@ -23,8 +23,7 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+Four of my five real test questions retrieved the answer-bearing chunk at rank 1 with a low distance (0.210-0.382). The fifth — "When can I change rooms if I don't like my roommate?" — had its answer at rank 2 (distance 0.380) instead of rank 1, behind another reply from the same thread. Retrieval isn't guaranteed to rank the single most relevant reply first when a thread has several replies about closely related sub-topics, so I set the target at 4 of 5 rather than 5 of 5 to leave room for that kind of near-miss without treating it as a failure, since the answer still shows up somewhere in the top-k either way.
 
 ---
 
@@ -33,8 +32,7 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+Unlike criterion 1, this isn't about retrieval quality — it's enforced directly in the prompt. `generate.py`'s `GROUNDING_INSTRUCTION` and `build_prompt` both explicitly tell the model to name the filename it used, on every question that reaches generation. A question only reaches generation after passing the relevance gate, so as long as the model follows an instruction repeated in every prompt, there's no reason one answered question would name a source while another wouldn't. I set this one at 5 of 5, not 4 of 5, because it's a prompt-following check, not a variable retrieval outcome.
 
 ---
 
@@ -44,14 +42,8 @@ When I ask a question my documents clearly don't cover, the relevance gate
 stops it and the system returns "I don't have enough information about that" —
 in at least 4 of 5 tries.
 
-<!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
-     `questions.py`, and `run_eval.py` puts them through the gate and writes
-     what happened into your run log. Swap them for your own if you'd rather —
-     just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
-
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+When I ran the five `OUT_OF_SCOPE` questions against the five real ones in Milestone 4, the two groups didn't overlap at all: real questions scored 0.210-0.382, out-of-scope questions scored 0.819-0.905, a gap of over 0.4. With separation that clean on the corpus I actually tested, I'd expect close to 5 of 5 in practice — but I still set the target at 4 of 5 rather than 5 of 5, since these five out-of-scope questions are the only ones I've measured, and an out-of-scope question worded closer to my corpus's vocabulary than these five happen to be could plausibly land nearer the gate.
 
 ---
 
