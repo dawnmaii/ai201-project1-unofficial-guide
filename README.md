@@ -82,30 +82,30 @@ The library being open until 2am is a trap. It's a resource, not a schedule.
 
 ## Sample Answer
 
-<!-- One complete question and answer, pasted as text, with the source line
-     visible. Milestone 4. -->
+```text
+**Question:** What is the limit to use the pass/fail option on classes per year?
 
-**Question:**
+**Answer:** Based on the provided documents, the limit is two per year (and eight across the degree) (thread_pass_fail.txt).
 
-**Answer:**
-
-```
+**Sources retrieved:** thread_first_year_regret.txt, thread_pass_fail.txt
 ```
 
 **My relevance cutoff:**
 
-<!-- The number you set in config.py, and how you got there.
-
-     You ran five questions your corpus covers and the five in OUT_OF_SCOPE
-     that it clearly doesn't, and wrote down the best distance for each. What
-     did those two groups look like? Where was the gap? Put the actual numbers
-     here — the table below wants all ten rows.
-
-     Milestone 4. -->
-
 | Question | In corpus? | Best distance |
-|---|---|---|
-|  |  |  |
+| --- | --- | --- |
+| Which study spots are usually empty? | yes | 0.382 |
+| When can I change rooms if I don't like my roommate? | yes | 0.367 |
+| What is the limit to use the pass/fail option on classes per year? | yes | 0.210 |
+| Which RAM option do CS students usually use on their laptops? | yes | 0.287 |
+| What is the printing quota for black and white pages? | yes | 0.256 |
+| What is the capital of Mongolia? | no | 0.899 |
+| How do I change the oil in a diesel engine? | no | 0.905 |
+| Who won the 1994 World Cup? | no | 0.898 |
+| What is the recommended dosage of ibuprofen for a headache? | no | 0.819 |
+| How do I write a for loop in Rust? | no | 0.861 |
+
+In-scope questions had a lower distance overall (0.210 - 0.382) than the out-of-scope questions (0.819 - 0.905), showing a clean separation between what my corpus covers and what it doesn't. I decided to keep 0.6 as the cutoff because it's almost exactly the midpoint of the gap between the two groups' distances ((0.382 + 0.819)/2 = 0.6005), giving equal margin on both sides. I also kept `top_k` at 5 because the answer-bearing chunk already appeared somewhere in the top 5 results for all five of my test questions, so raising it wouldn't have added anything.
 
 ## How I Used AI
 
