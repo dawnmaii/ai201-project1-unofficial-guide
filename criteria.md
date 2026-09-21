@@ -55,43 +55,21 @@ in at least 4 of 5 tries.
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunks preserve whole posts
 
-<!-- YOU WRITE THIS ONE.
+For at least 20 of the 23 documents, the document survives chunking as a single, complete chunk rather than being split into fragments.
 
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
-
-**Why this target:**
-
-
+**Why this target:** 
+With `CHUNK_SIZE=800` and `CHUNK_OVERLAP=120`, three of the 23 threads (`bike_commute`, `first_year_regret`, `meal_plan_tier`) get split into a real chunk plus a near-empty tail fragment (as short as 2 characters) — not because the document is too long (the longest is 793 chars, under the 800 limit), but because `fallback_split`'s loop advances by `chunk_size - overlap` (680 chars) and re-enters for any document longer than that, producing a redundant trailing chunk that duplicates content already in the first chunk. 20/23 is what the corpus gives me at this setting; the target names that baseline so I can tell in Milestone 3 whether a real chunking strategy (e.g., stopping once a doc fits in one window, or splitting on reply boundaries) improves on it.
 
 ---
 
-## 5. Your choice
+## 5. Retrieval doesn't confuse similarly-themed threads
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+For at least 4 of the 5 test questions (specifically in `THREAD_CONFUSION_QUESTIONS` in questions.py), the top retrieved chunk's source file exactly matches that question's `correct_source`.
 
 **Why this target:**
-
-
+`advice_threads` has several thread pairs that share vocabulary and topic area without sharing an answer — `bike_commute`/`commuting` (both about getting to campus), `changing_major`/`transfer_credits` (both about credits mapping to a major), `office_hours_etiquette`/`professor_email` (both literally say office hours are "usually empty"), and `pass_fail`/`late_work` each overlapping with `first_year_regret`, which restates facts from both. Criterion 1 only checks that *an* answer-bearing chunk shows up; it doesn't catch the case where the retriever pulls a confident-looking chunk from the wrong thread because the topics are semantically close. `THREAD_CONFUSION_QUESTIONS` names the five specific pairs so this is checkable the same way twice, not a judgment call about which threads "count" as similar.
 
 ---
 

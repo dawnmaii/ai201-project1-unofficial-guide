@@ -23,11 +23,49 @@ names a target of "4 of 5", and four of three is not a thing.
 
 QUESTIONS = [
     # {"question": "...", "expects": "..."},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
+    {"question": "Which study spots are usually empty?", "expects": "science building"},
+    {"question": "When can I change rooms if I don't like my roommate?", "expects": "end of the semester"},
+    {"question": "What is the limit to use the pass/fail option on classes per year?", "expects": "two"},
+    {"question": "Which RAM option do CS students usually use on their laptops?", "expects": "16GB"},
+    {"question": "What is the printing quota for black and white pages?", "expects": "about 600 pages, $30"},
+]
+
+# Five questions for criterion 5: each one has a correct answer in
+# `correct_source`, but is topically close enough to `confusable_with` that a
+# retriever with weak discrimination could easily pull the wrong thread.
+# There are five of these for the same reason `OUT_OF_SCOPE` has five: criterion
+# 5 names a target of "4 of 5", which needs five things to try it against.
+THREAD_CONFUSION_QUESTIONS = [
+    {
+        "question": "What did it cost in total to keep a cheap bike just for the fall?",
+        "expects": "$120",
+        "correct_source": "thread_bike_commute.txt",
+        "confusable_with": "thread_commuting.txt",
+    },
+    {
+        "question": "Who should I actually talk to if I want to change my major?",
+        "expects": "adviser for the major you want",
+        "correct_source": "thread_changing_major.txt",
+        "confusable_with": "thread_transfer_credits.txt",
+    },
+    {
+        "question": "Is it normal to show up to office hours with no specific question?",
+        "expects": "yes",
+        "correct_source": "thread_office_hours_etiquette.txt",
+        "confusable_with": "thread_professor_email.txt",
+    },
+    {
+        "question": "How many courses can I take pass/fail per year?",
+        "expects": "two",
+        "correct_source": "thread_pass_fail.txt",
+        "confusable_with": "thread_first_year_regret.txt",
+    },
+    {
+        "question": "When's the right time to ask an instructor for a deadline extension?",
+        "expects": "before the deadline",
+        "correct_source": "thread_late_work.txt",
+        "confusable_with": "thread_first_year_regret.txt",
+    },
 ]
 
 # Questions from a different world entirely. Your gate should refuse all five.
