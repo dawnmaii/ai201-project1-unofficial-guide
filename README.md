@@ -2,30 +2,13 @@
 
 Dawn Mai, advice_threads
 
-> **This file is your submission.** Fill it in as you go — most sections get
-> written during the milestone that produces them, not at the end.
->
-> How the starter works, and every command you'll need, is in `RUNNING.md`.
-> Leave that file alone.
->
-> **Paste everything as text.** No screenshots, no video. A typed table gets
-> full credit; a picture of the same table gets none.
->
-> Delete these instruction blocks as you replace them. The `<!-- -->` comments
-> are notes to you and don't show up when the page renders — you can leave them
-> or remove them.
-
 ---
 
 ## Unit 1
 
 ## What This Does
 
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+This is a question-answering system built on the `advice_threads` corpus — a set of forum-style threads where students post questions about campus life and other students reply with upvoted advice. Ask it something the corpus covers, like "what's the pass/fail limit per year?" or "which study spots are usually empty?", and it retrieves the relevant thread and answers using only what's in it, naming the source file. Ask it something the corpus doesn't cover — a question from an entirely different topic, like car maintenance or sports trivia — and it says so instead of guessing.
 
 ## Chunking Strategy
 
@@ -109,23 +92,9 @@ In-scope questions had a lower distance overall (0.210 - 0.382) than the out-of-
 
 ## How I Used AI
 
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
+**1.** I asked Claude to walk me through writing `split_documents` in `chunker.py` line by line instead of pasting in a finished version, so I typed the reply-boundary splitting logic myself. When I ran it, my editor flagged the `continue` statement as making the rest of the function unreachable — I'd left it at the same indentation as the `if not replies:` line above it instead of inside that block, so it ran on every document instead of only the ones with no replies. I fixed the indentation myself once Claude pointed out what the warning meant.
 
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
-
-     Milestone 5. -->
-
-**1.**
-
-**2.**
-
-<!-- ── Stretch features ─────────────────────────────────────────────────────
-     Doing one? Say so here BEFORE you start. A feature this README never
-     claims earns nothing.
-     ───────────────────────────────────────────────────────────────────────── -->
+**2.** While drafting `criteria.md`, I asked Claude to check criterion 5 for ambiguity — specifically, whether someone could check it without asking me what I meant. It came back that "in at least 4 of 5 tries" didn't say which 5 questions those were, unlike criterion 3, which points at a named list (`OUT_OF_SCOPE`). I fixed it by adding a `THREAD_CONFUSION_QUESTIONS` list to `questions.py` with five specific question pairs, and reworded criterion 5 to point at that list the same way criterion 3 does.
 
 ---
 
