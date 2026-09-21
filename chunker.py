@@ -21,12 +21,13 @@ If you get stuck for 30 minutes, `fallback_split` is the original. Switch back
 to it, write down what you saw, and move on. That's a real observation about
 your pipeline, not giving up.
 """
-
+import re
 from dataclasses import dataclass
 
 import config
 from ingest import Document
 
+REPLY_MARKER = re.compile(r"--- reply \d+ \(\d+ votes\) ---")
 
 @dataclass
 class Chunk:
@@ -81,23 +82,27 @@ def fallback_split(
 
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
-    """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
-
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
-
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
-
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
-    """
-    return fallback_split(documents)
+    chunks = []
+    for doc in documents:
+        pieces = REPLY_MARKER.split(doc.text)
+        title = pieces[0].strip()
+        replies = [piece.strip() for piece in pieces[1:] if piece.strip()]
+        if not replies:
+            chunks.append(Chunk(
+                text=doc.text.strip(),
+                source=doc.source,
+                index=0,
+                produced_by="chunker.py::split_documents",
+            ))
+            continue
+        for i, reply in enumerate(replies):
+            chunks.append(Chunk(
+                text=f"{title}\n\n{reply}",
+                source=doc.source,
+                index=i,
+                produced_by="chunker.py::split_documents",
+        ))
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:

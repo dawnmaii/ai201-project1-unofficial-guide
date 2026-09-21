@@ -55,12 +55,12 @@ in at least 4 of 5 tries.
 
 ---
 
-## 4. Chunks preserve whole posts
+## 4. No chunk is a fragment
 
-For at least 20 of the 23 documents, the document survives chunking as a single, complete chunk rather than being split into fragments.
+Every chunk in the index is at least 100 characters long.
 
-**Why this target:** 
-With `CHUNK_SIZE=800` and `CHUNK_OVERLAP=120`, three of the 23 threads (`bike_commute`, `first_year_regret`, `meal_plan_tier`) get split into a real chunk plus a near-empty tail fragment (as short as 2 characters) — not because the document is too long (the longest is 793 chars, under the 800 limit), but because `fallback_split`'s loop advances by `chunk_size - overlap` (680 chars) and re-enters for any document longer than that, producing a redundant trailing chunk that duplicates content already in the first chunk. 20/23 is what the corpus gives me at this setting; the target names that baseline so I can tell in Milestone 3 whether a real chunking strategy (e.g., stopping once a doc fits in one window, or splitting on reply boundaries) improves on it.
+**Why this target:**
+With the old fixed-window chunker, advice_threads produced fragments as short as 2 characters (`thread_meal_plan_tier.txt`'s leftover "t."), because the window cut mid-sentence with no regard for content boundaries. Switching to reply-boundary splitting fixes that directly — the shortest chunk is now 105 characters, comfortably above 100 — but the target is worth keeping on its own rather than dropping it, since it's a concrete check that would catch a regression (e.g., a thread with an unusually short reply, or a future corpus where reply-splitting produces something tiny) rather than assuming the fix holds forever.
 
 ---
 

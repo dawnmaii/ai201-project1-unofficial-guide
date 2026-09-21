@@ -1,6 +1,6 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
+Dawn Mai, advice_threads
 
 > **This file is your submission.** Fill it in as you go — most sections get
 > written during the milestone that produces them, not at the end.
@@ -17,7 +17,7 @@
 
 ---
 
-# Unit 1
+## Unit 1
 
 ## What This Does
 
@@ -29,53 +29,55 @@
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
+**Chunk size:** Not fixed
+**Overlap:** 0
 
-<!-- What about YOUR documents made you pick these numbers? Short posts and
-     long sectioned guides don't want the same chunking, and "800 seemed
-     reasonable" earns nothing. Point at something you noticed when you read
-     the documents in Milestone 1.
+The starter's fixed 800-character window was a bad fit for `advice_threads`: every thread is well under 800 characters, so it rarely split anything on its own, but when a thread happened to run just past that limit, it produced a real chunk plus a near-useless tail fragment — `thread_meal_plan_tier.txt` split into a 682-character chunk and a 2-character leftover ("t."), and `thread_bike_commute.txt` split into 739 and 59 characters, cutting a sentence in half rather than at a natural boundary. Reading through the corpus in Milestone 1, I noticed each thread is already structured as a title followed by several `--- reply N (votes) ---` blocks, and each reply is a self-contained point from a different commenter. One thread, `thread_first_year_regret.txt`, even bundles five unrelated tips (deadlines, pass/fail, the writing centre, and more) into a single document — splitting on character count would either merge those unrelated tips into one chunk or cut a single reply in half depending on where the 800-character line fell. Splitting on the reply marker instead follows a boundary the corpus already marks for me, so every chunk is exactly one commenter's point, no more and no less.
 
-     If you changed your mind partway through, say so and say why. That's worth
-     more than pretending you got it right first time.
-
-     Milestone 3. -->
+Chunk size varied due to the length of each individual reply per thread in the corpus. On average, replies were anywhere from 105 to 254 characters in length, which roughly translates to a 175 character average. Overlap is 0 because we divided chunks based on reply, and each reply is unique. No content is cut off or shared between replies.
 
 ## Sample Chunks
 
-<!-- Five chunks, pasted as text. Label each one and name the file it came from
-     AND the function that produced it — the grader checks your code against
-     what you claim here.
+```text
+======================================================================
+Chunk 1  |  source: thread_bike_commute.txt#0  |  produced by: chunker.py::split_documents
+======================================================================
 
-     `python app.py chunks -n 5` prints all three for you. Copy them straight
-     across.
+THREAD: Is a bike worth it for a 20 minute walk commute?
 
-     Milestone 3. -->
+Yeah. Cuts an 18 minute walk to about 6. The thing nobody mentions is storage — covered bike parking exists at three buildings and is full by 9am at all three.
 
-**Chunk 1** — source: `` — produced by: ``
+======================================================================
+Chunk 2  |  source: thread_first_gen.txt#1  |  produced by: chunker.py::split_documents
+======================================================================
 
-```
-```
+THREAD: Anything specific for first-generation students?
 
-**Chunk 2** — source: `` — produced by: ``
+The thing I'd say: the unwritten rules are the hard part, not the coursework. Ask about the unwritten rules explicitly. People are happy to explain them and nobody volunteers them.
 
-```
-```
+======================================================================
+Chunk 3  |  source: thread_laptop_specs.txt#2  |  produced by: chunker.py::split_documents
+======================================================================
 
-**Chunk 3** — source: `` — produced by: ``
+THREAD: How much laptop do I actually need for CS courses?
 
-```
-```
+I did two years on an 8GB machine and it was fine until the last project, at which point it very much wasn't. 16 is the answer.
 
-**Chunk 4** — source: `` — produced by: ``
+======================================================================
+Chunk 4  |  source: thread_parking.txt#1  |  produced by: chunker.py::split_documents
+======================================================================
 
-```
-```
+THREAD: Worth getting a parking permit?
 
-**Chunk 5** — source: `` — produced by: ``
+Street parking on Verrill is legal and free and unmarked, which is why half the upper years do it.
 
-```
+======================================================================
+Chunk 5  |  source: thread_sleep_schedule.txt#1  |  produced by: chunker.py::split_documents
+======================================================================
+
+THREAD: Everyone says fix your sleep. Does it actually matter?
+
+The library being open until 2am is a trap. It's a resource, not a schedule.
 ```
 
 ## Sample Answer
@@ -127,7 +129,7 @@
 
 ---
 
-# Unit 2
+## Unit 2
 
 <!-- These sections get ADDED to what's already above. Don't delete or rewrite
      unit 1 — the point is that someone can see what you said before you knew
