@@ -18,8 +18,10 @@ rest of the project if they were wrong:
 """
 
 import os
+import re
 import shutil
 from dataclasses import dataclass
+from rank_bm25 import BM25Okapi
 
 # Must be set BEFORE chromadb is imported. Without it, some Chroma versions
 # print "Failed to send telemetry event ..." on every single call — which looks
@@ -177,46 +179,54 @@ def build_index(
 
     return len(chunks)
 
+# Updated search function for Milestone 4
 
-def search(
-    question: str,
-    top_k: int | None = None,
-    corpus: str | None = None,
-    variant: str = "default",
-) -> list[Result]:
-    """
-    Retrieve the chunks closest in meaning to a question.
-
-    Returns them nearest-first, each with its distance.
-    """
+def search(question, top_k=None, corpus=None, variant="default"):
     top_k = top_k or config.TOP_K
     name = config.collection_name(corpus, variant)
 
     try:
         collection = _client().get_collection(name)
     except Exception as exc:
-        raise RuntimeError(
-            f"No index called '{name}'. Run `python app.py index` first."
-        ) from exc
+        raise RuntimeError(f"No index called '{name}'. Run `python app.py index` first.") from exc
 
-    raw = collection.query(
-        query_embeddings=embed([question]),
-        n_results=min(top_k, collection.count()),
-    )
+    n = collection.count()
 
-    results: list[Result] = []
-    for text, meta, distance in zip(
-        raw["documents"][0], raw["metadatas"][0], raw["distances"][0]
-    ):
-        results.append(
-            Result(
-                text=text,
-                source=str(meta.get("source", "unknown")),
-                label=f"{meta.get('source', 'unknown')}#{meta.get('index', 0)}",
-                distance=float(distance),
-                produced_by=str(meta.get("produced_by", "unknown")),
-            )
-        )
+    # Full cosine ranking, every chunk, so BM25 can rerank across all of them.
+    raw = collection.query(query_embeddings=embed([question]), n_results=n)
+    cos_by_id = dict(zip(raw["ids"][0], raw["distances"][0]))
+
+    bm25, ids, documents, metadatas = _bm25_index(collection, name)
+    bm25_scores = bm25.get_scores(_tokenize(question))
+
+    candidates = []
+    for i, doc_id in enumerate(ids):
+        cos_distance = cos_by_id[doc_id]
+        bm25_score = bm25_scores[i]
+        candidates.append((doc_id, documents[i], metadatas[i], cos_distance, bm25_score))
+
+    # Normalize both to 0-1 so they're on comparable scales before combining.
+    cos_vals = [c[3] for c in candidates]
+    bm25_vals = [c[4] for c in candidates]
+    cos_lo, cos_hi = min(cos_vals), max(cos_vals)
+    bm25_lo, bm25_hi = min(bm25_vals), max(bm25_vals)
+
+    def rank_score(cos_distance, bm25_score):
+        cos_norm = 1 - (cos_distance - cos_lo) / (cos_hi - cos_lo + 1e-9)   # higher = better
+        bm25_norm = (bm25_score - bm25_lo) / (bm25_hi - bm25_lo + 1e-9)     # higher = better
+        return 0.5 * cos_norm + 0.5 * bm25_norm
+
+    candidates.sort(key=lambda c: rank_score(c[3], c[4]), reverse=True)
+
+    results = []
+    for doc_id, text, meta, cos_distance, _ in candidates[:top_k]:
+        results.append(Result(
+            text=text,
+            source=str(meta.get("source", "unknown")),
+            label=f"{meta.get('source', 'unknown')}#{meta.get('index', 0)}",
+            distance=float(cos_distance),   # real cosine distance, unchanged — the gate depends on this
+            produced_by=str(meta.get("produced_by", "unknown")),
+        ))
     return results
 
 
@@ -238,3 +248,34 @@ def reset():
     """Delete every index. Occasionally the fastest way out of a mess."""
     if config.CHROMA_DIR.exists():
         shutil.rmtree(config.CHROMA_DIR)
+
+# For the BM25 improvement in Milestone 4.
+
+_STEM_SUFFIXES = ("ing", "ed", "s")
+
+def _stem(word: str) -> str:
+    """Crude suffix stripping so 'rooms'/'room' and 'changes'/'change' collide."""
+    for suffix in _STEM_SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            return word[: -len(suffix)]
+    return word
+
+def _tokenize(text: str) -> list[str]:
+    words = re.findall(r"[a-z0-9']+", text.lower())
+    return [_stem(w) for w in words]
+
+_bm25_cache: dict[str, tuple[BM25Okapi, list[str], list[str], list[dict]]] = {}
+
+def _bm25_index(collection, name: str):
+    if name in _bm25_cache:
+        return _bm25_cache[name]
+
+    raw = collection.get()
+    ids = raw["ids"]
+    documents = raw["documents"]
+    metadatas = raw["metadatas"]
+    tokenized = [_tokenize(doc) for doc in documents]
+
+    bm25 = BM25Okapi(tokenized)
+    _bm25_cache[name] = (bm25, ids, documents, metadatas)
+    return _bm25_cache[name]

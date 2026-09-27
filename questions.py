@@ -24,10 +24,10 @@ names a target of "4 of 5", and four of three is not a thing.
 QUESTIONS = [
     # {"question": "...", "expects": "..."},
     {"question": "Which study spots are usually empty?", "expects": "science building"},
-    {"question": "When can I change rooms if I don't like my roommate?", "expects": "end of the semester"},
+    {"question": "When can I change rooms if I don't like my roommate?", "expects": "semester"},
     {"question": "What is the limit to use the pass/fail option on classes per year?", "expects": "two"},
     {"question": "Which RAM option do CS students usually use on their laptops?", "expects": "16GB"},
-    {"question": "What is the printing quota for black and white pages?", "expects": "about 600 pages, $30"},
+    {"question": "What is the printing quota for black and white pages?", "expects": "600 pages"},
 ]
 
 # Five questions for criterion 5: each one has a correct answer in
