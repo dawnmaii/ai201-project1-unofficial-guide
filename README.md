@@ -100,52 +100,74 @@ In-scope questions had a lower distance overall (0.210 - 0.382) than the out-of-
 
 ## Unit 2
 
-<!-- These sections get ADDED to what's already above. Don't delete or rewrite
-     unit 1 — the point is that someone can see what you said before you knew
-     how it went. -->
-
 ## Run Log — Before
 
-<!-- Your five criteria, three runs each. `python run_eval.py --label before`
-     runs the questions, puts the OUT_OF_SCOPE ones through the gate, and
-     writes it all into results/ for you. Targets come from criteria.md; the
-     verdict column is your call.
-
-     Criterion 3 is measured in one deterministic pass rather than three, so
-     the same number goes in all three run columns. That's correct, not lazy.
-
-     Milestone 1. -->
-
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| --- | --- | --- | --- | --- | --- |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 3 of 5 | 3 of 5 | 3 of 5 | MISSED |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. No chunk is a fragment | all ≥100 chars | 75/75 ≥100 chars | 75/75 ≥100 chars | 75/75 ≥100 chars | MET |
+| 5. Retrieval doesn't confuse similarly-themed threads | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
 
-<!-- Underneath, paste the REAL output for each criterion from one of your
-     runs — the actual text your system produced, not a description of it.
-     Name the file and function that produced it. -->
+Produced by `criteria_eval.py::check_retrieval_contains_answer`
+
+- ran only once since retrieval is deterministic
+
+```text
+=== Criterion 1 ===
+HIT   Which study spots are usually empty?
+MISS  When can I change rooms if I don't like my roommate?
+HIT   What is the limit to use the pass/fail option on classes per year?
+HIT   Which RAM option do CS students usually use on their laptops?
+MISS  What is the printing quota for black and white pages?
+
+criterion 1: 3 of 5
+```
+
+Produced by `criteria_eval.py::check_answers_name_sources`
+
+```text
+=== Criterion 2 ===
+yes yes yes  Which study spots are usually empty?
+yes yes yes  When can I change rooms if I don't like my roommate?
+yes yes yes  What is the limit to use the pass/fail option on classes per year?
+yes yes yes  Which RAM option do CS students usually use on their laptops?
+yes yes yes  What is the printing quota for black and white pages?
+```
+
+Produced by `criteria_eval.py::check_chunk_lengths`
+
+- ran only once since chunking is deterministic and based on replies to threads
+
+```text
+=== Criterion 4 ===
+shortest chunk: thread_clubs.txt#0 at 105 chars
+chunks under 100 chars: 0 of 75
+```
+
+Produced by `criteria_eval.py::check_thread_confusion`
+
+- ran only once since thread confusion is dependent on chunks and retrieval, both of which are deterministic
+
+```text
+=== Criterion 5 ===
+MATCH  top=thread_bike_commute.txt  expected=thread_bike_commute.txt
+MATCH  top=thread_changing_major.txt  expected=thread_changing_major.txt
+MATCH  top=thread_office_hours_etiquette.txt  expected=thread_office_hours_etiquette.txt
+MATCH  top=thread_pass_fail.txt  expected=thread_pass_fail.txt
+MATCH  top=thread_late_work.txt  expected=thread_late_work.txt
+```
 
 ## Verdicts
 
-<!-- MET or MISSED for each of the five, against the target you wrote last
-     unit — not a new one. Plus a sentence on how you decided. That sentence
-     matters most where it was close.
-
-     If your target said 4 of 5 and your runs came out 4, 3, 4, that's a MISS.
-     The target has to hold, not show up occasionally.
-
-     Milestone 2. -->
-
 | # | Criterion | Verdict | How I decided |
-|---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| --- | --- | --- | --- |
+| 1 | Retrieved chunks contain the answer | MISSED | Target was 4 of 5; all three runs came out 3 of 5, with no variation across runs. The two misses (roommate, printing) may still be factually correct — the expected phrase is likely just worded differently than the chunk text. |
+| 2 | Every answer names a source | MET | Target was 5 of 5; all three runs came out 5 of 5, with every generated answer naming at least one source filename. |
+| 3 | The relevance gate stops out-of-corpus questions | MET | Target was 4 of 5. All three runs refused 5 of 5 out-of-scope questions, comfortably above the target with no variation across runs. |
+| 4 | No chunk is a fragment | MET | Target was every chunk ≥100 characters. All 75 chunks in the index came out at 105 characters or longer, with none below the threshold. |
+| 5 | Retrieval doesn't confuse similarly-themed threads | MET | Target was 4 of 5; the top retrieved chunk matched the correct thread on 5 of 5 thread-confusion questions. |
 
 ## Diagnoses
 
