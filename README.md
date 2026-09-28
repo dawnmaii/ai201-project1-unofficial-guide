@@ -96,6 +96,10 @@ In-scope questions had a lower distance overall (0.210 - 0.382) than the out-of-
 
 **2.** While drafting `criteria.md`, I asked Claude to check criterion 5 for ambiguity — specifically, whether someone could check it without asking me what I meant. It came back that "in at least 4 of 5 tries" didn't say which 5 questions those were, unlike criterion 3, which points at a named list (`OUT_OF_SCOPE`). I fixed it by adding a `THREAD_CONFUSION_QUESTIONS` list to `questions.py` with five specific question pairs, and reworded criterion 5 to point at that list the same way criterion 3 does.
 
+**3.** I had AI review the codebase once before changes and once after, to ensure that the code implemented didn't cause any further bugs, and if they did, they were addressed immediately. The `retrieval_hits` function in `scorer.py` was one such example; AI pointed out that it looped over chunks, but never checked their content and thus was "truthy" by nature. I used its recommendations to understand the fixes that needed to be made.
+
+**4.** AI also helped me create `criteria_eval.py`, which allowed me to quickly run tests for all five criteria and print outputs for each for the Run Log. Otherwise, I would've had to execute `run_eval.py` multiple times and keep track of the responses elsewhere.
+
 ---
 
 ## Unit 2
