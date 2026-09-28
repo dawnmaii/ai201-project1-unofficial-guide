@@ -173,7 +173,7 @@ MATCH  top=thread_late_work.txt  expected=thread_late_work.txt
 
 Crtierion 1 (3 of 5, MISSED)
 
-The two misses are from the roommate question (answer is "Room changes happen at the semester boundary almost always, and mid-semester only in fairly serious cases.") and the printing question (answer is "about 600 pages black and white"). The retrieval step did pull the right chunks for each question; it was the "expects" field in `questions.py` that failed since it tried to check for the answer with an exact substring match. I filled out the "expects" field with my summarized version of the answers instead, which is why the pipeline didn't find the answer even though it was there. A mistake on my end; it is now fixed
+The two misses are from the roommate question (answer is "Room changes happen at the semester boundary almost always, and mid-semester only in fairly serious cases.") and the printing question (answer is "about 600 pages black and white"). The retrieval step did pull the right chunks for each question; it was the `expects` field in `questions.py` that failed since it tried to check for the answer with an exact substring match. I filled out the `expects` field with my summarized version of the answers instead, which is why the pipeline didn't find the answer even though it was there. A mistake on my end.
 
 ## The Improvement
 
@@ -182,9 +182,6 @@ The two misses are from the roommate question (answer is "Room changes happen at
 **Why I picked it:** The roommate question's answer-bearing chunk ranked 2nd on pure cosine distance (0.380), just behind an unrelated chunk from the same thread (0.367). Hybrid search adds BM25 keyword scoring so exact term overlap can push the right chunk up in rank, even when semantic distance is close. I kept each Result's cosine distance unchanged (only the ranking/selection uses the blended score) so the relevance gate's 0.6 threshold, which is calibrated against raw cosine distance and doesn't need to be recalibrated. I weighted cosine and BM25 evenly (0.5/0.5) as a starting point rather than tuning it against this small a test set.
 
 ### Run Log — After
-
-<!-- Same format, same five criteria, three runs each.
-     `python run_eval.py --label after` -->
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 | --- | --- | --- | --- | --- | --- |
@@ -200,17 +197,8 @@ The fix did help. Criterion 1 is now fully met, with all five test questions hav
 
 ## What's Still Broken
 
-<!-- For each criterion still missed after your fix: what you'd do about it,
-     and why you stopped where you did.
-
-     "I ran out of time" is fine if it's true. Pretending nothing is left is
-     not.
-
-     Milestone 5. -->
+All five criteria are met after the hybrid search fix. The `judge()` function in `scorer.py` is a bit unstable still. I found that for the printing question specifically, it failed to find the answer one time out of the three runs conducted because exact-substring matching is still failing (just less). The issue persists even if the correct chunks are found. I would shorten the `expects` fields for the test questions even more so that they're less sensitive to how the thread replies are phrased; I thought two keywords/tokens would be sufficient, but I guess it would be question dependent and what the corpus is able to initially provide in order for the pipeline to find the relevant answer. There's also the possibility of loosening `judge()`'s exact-substring check. I stopped here because this is a scorer fix. The system works fine now.
 
 ## What I'd Do Differently
 
-<!-- Knowing what you know now — which of your five criteria would you write
-     differently, and why?
-
-     Milestone 5. -->
+Moving forward, I'd focus on criterion 1 and write `expects` values in `questions.py` as literal substrings pulled straight from the corpus text and not paraphrases of the answer.
